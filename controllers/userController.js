@@ -12,6 +12,10 @@ const validateUserSignupData = [
     body('password').trim().isLength({ min: 6 }).withMessage('please use a strong password!').matches(passRegex).withMessage('Special symbols not allowed!')
 ]
 
+const validateUserLoginData = [
+    body('email').isEmail().withMessage('Enter a valid email!').notEmpty().withMessage('email is required!'),
+    body('password').trim().isLength({ min: 6 }).withMessage('please use a strong password!').matches(passRegex).withMessage('Special symbols not allowed!')
+]
 
 const registerUser = [validateUserSignupData,
     async (req, res) => {
@@ -44,8 +48,34 @@ const registerUser = [validateUserSignupData,
         }
     }]
 
-const userLogin = (req, res) => {
-    res.json({ status: 200, message: 'Looged in!' })
-}
+const userLogin = [validateUserLoginData, async (req, res) => {
+    const { email, password } = req.body
+
+    const errors = validationResult(req).array({ onlyFirstError: true })
+    try {
+        //check if email exists 
+        const user = await db.findUserByEmail(email)
+        if (user) {
+            //user email found now let's check if password matches.
+            const isMatch = await bcrypt.compare(password, user.user_password)
+
+            //there is match
+            if (isMatch) {
+                return res.json({ status: 200, msg: `welcome ${user.user_name}` })
+            }
+            errors.push({ path: 'password', msg: 'wrong password' })
+            return res.json({ status: 401, errors: errors })
+        } else {
+            errors.push({ path: 'email', msg: 'user not found' })
+            return res.json({ status: 404, errors: errors })
+        }
+
+    } catch (error) {
+
+    }
+
+
+    // console.log(email, password)
+}]
 
 module.exports = { registerUser, userLogin }
