@@ -1,6 +1,7 @@
 const { body, validationResult } = require('express-validator')
 const db = require('../db/queries')
 const bcrypt = require('bcrypt')
+const jwt = require('jsonwebtoken')
 
 const textRegex = /^[A-Za-z ]+$/;
 const passRegex = /^[A-Za-z\d@$!%*#?&^_-]{6,32}$/;
@@ -61,7 +62,11 @@ const userLogin = [validateUserLoginData, async (req, res) => {
 
             //there is match
             if (isMatch) {
-                return res.json({ status: 200, msg: `welcome ${user.user_name}` })
+                const payload = {
+                    user_id: user.user_id,
+                }
+                const token = jwt.sign(payload, process.env.MY_SECRET_KEY)
+                return res.json({ status: 200, msg: `welcome ${user.user_name}`, token: token, userName: user.user_name })
             }
             errors.push({ path: 'password', msg: 'wrong password' })
             return res.json({ status: 401, errors: errors })
@@ -71,11 +76,39 @@ const userLogin = [validateUserLoginData, async (req, res) => {
         }
 
     } catch (error) {
-
+        return res.json({ status: 500, msg: error.message })
     }
 
 
     // console.log(email, password)
 }]
 
-module.exports = { registerUser, userLogin }
+
+const checkDataOfUser = async (req, res) => {
+    const userId = req.user_id
+    try {
+        const result = await db.userAndProfile(Number(userId))
+        if (result.profile_id) {
+            return res.json({ status: 200, msg: 'Data found!' })
+        }
+        else {
+            return res.json({ status: 404, msg: 'Data not found!' })
+        }
+    } catch (error) {
+        return res.json({ status: 500, msg: error.message })
+    }
+}
+
+const userProfileData = async (req, res) => {
+    const userId = req.user_id
+    const formData = req.body
+    try {
+        await db.addUserProfile(Number(userId), formData)
+        return res.json({ status: 200, msg: 'Data entered!' })
+
+    } catch (error) {
+        return res.json({ status: 500, msg: error.message })
+    }
+}
+
+module.exports = { registerUser, userLogin, checkDataOfUser, userProfileData }
