@@ -41,7 +41,32 @@ const userDetailsSQL = `
     );
     `;
 
-// CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+const sleepTableSQL = `
+DROP TABLE IF EXISTS sleep_data;
+CREATE TABLE IF NOT EXISTS sleep_data(
+  id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+  user_id INTEGER REFERENCES users(user_id),
+  bedTime TEXT,
+  wakeTime TEXT,
+  quality INTEGER,
+  hours REAL,
+  notes TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP 
+)
+`
+const moodTableSQL = `
+DROP TABLE IF EXISTS mood_data;
+CREATE TABLE IF NOT EXISTS mood_data(
+  id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+  user_id INTEGER REFERENCES users(user_id),
+  rating INTEGER,
+  emotions TEXT,
+  energy TEXT,
+  stress TEXT,
+  notes TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP 
+)
+`
 
 async function main() {
   console.log('Sending...')
@@ -49,8 +74,8 @@ async function main() {
     connectionString: process.env.CONNECTION_STRING
   })
   await client.connect()
-  await client.query(createUserSql)
-  await client.query(userDetailsSQL)
+  // await client.query(createUserSql)
+  await client.query(moodTableSQL)
   // await client.query(`DROP TABLE IF EXISTS users`)
   // await client.query(`DROP TABLE IF EXISTS user_profiles`)
   await client.end()

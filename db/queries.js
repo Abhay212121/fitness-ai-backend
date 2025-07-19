@@ -28,4 +28,21 @@ const addUserProfile = async (user_id, formData) => {
     }
 }
 
-module.exports = { findUserByEmail, addUserInDb, userAndProfile, addUserProfile }
+const addSleepRecord = async (user_id, bedTime, wakeTime, quality, hours, notes) => {
+    try {
+        await pool.query(`INSERT INTO sleep_data(user_id,bedtime,waketime,quality,hours,notes) VALUES($1,$2,$3,$4,$5,$6)`, [user_id, bedTime, wakeTime, quality, hours, notes])
+    } catch (error) {
+        console.log(error.message)
+    }
+}
+
+const addMoodRecord = async (user_id, rating, emotions, energy, stress, notes) => {
+    try {
+        await pool.query(`INSERT INTO mood_data(user_id,rating,emotions,energy,stress,notes) VALUES($1,$2,$3,$4,$5,$6)`, [user_id, rating, emotions, energy, stress, notes])
+    } catch (error) {
+        console.log(error.message)
+    }
+}
+
+
+module.exports = { findUserByEmail, addUserInDb, userAndProfile, addUserProfile, addSleepRecord, addMoodRecord }
