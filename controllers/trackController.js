@@ -23,4 +23,17 @@ const postMoodData = async (req, res) => {
     }
 }
 
-module.exports = { postSleepData, postMoodData }
+const postWorkoutData = async (req, res) => {
+    const workoutName = req.body.workoutName;
+    const workoutNotes = req.body.workoutNotes;
+    const exerciseData = req.body.currentWorkout;
+    const userId = req.user_id
+    try {
+        await db.addWorkoutRecord(userId, workoutName, workoutNotes, exerciseData)
+        return res.json({ status: 200, msg: 'Done!' })
+    } catch (error) {
+        return res.json({ status: 500, msg: error.message })
+    }
+}
+
+module.exports = { postSleepData, postMoodData, postWorkoutData }

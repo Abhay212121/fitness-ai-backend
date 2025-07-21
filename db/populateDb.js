@@ -68,14 +68,45 @@ CREATE TABLE IF NOT EXISTS mood_data(
 )
 `
 
+const workoutTableSQL = `
+DROP TABLE IF EXISTS workout_data;
+CREATE TABLE IF NOT EXISTS workout_data(
+  workout_id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+  user_id INTEGER REFERENCES users(user_id),
+  workout_name TEXT,
+  workout_note TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  );
+  `
+const exerciseTableSQL = `
+  DROP TABLE IF EXISTS exercise_data;
+  CREATE TABLE IF NOT EXISTS exercise_data(
+  exercise_id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+  workout_id INTEGER REFERENCES workout_data(workout_id) ON DELETE CASCADE,
+  exercise_name TEXT
+);
+`
+const setTableSQL = `
+DROP TABLE IF EXISTS set_data;
+CREATE TABLE IF NOT EXISTS set_data(
+  set_id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+  exercise_id INTEGER REFERENCES exercise_data(exercise_id) ON DELETE CASCADE,
+  weight REAL,
+  reps_count INTEGER
+);
+`
+
+
 async function main() {
   console.log('Sending...')
   const client = new Client({
     connectionString: process.env.CONNECTION_STRING
   })
   await client.connect()
-  // await client.query(createUserSql)
-  await client.query(moodTableSQL)
+  await client.query(workoutTableSQL)
+  await client.query(exerciseTableSQL)
+  await client.query(setTableSQL)
+  // await client.query(moodTableSQL)
   // await client.query(`DROP TABLE IF EXISTS users`)
   // await client.query(`DROP TABLE IF EXISTS user_profiles`)
   await client.end()

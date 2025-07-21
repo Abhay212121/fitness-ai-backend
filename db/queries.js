@@ -44,5 +44,32 @@ const addMoodRecord = async (user_id, rating, emotions, energy, stress, notes) =
     }
 }
 
+const addWorkoutRecord = async (userId, workoutName, workoutNotes, exerciseData) => {
+    try {
 
-module.exports = { findUserByEmail, addUserInDb, userAndProfile, addUserProfile, addSleepRecord, addMoodRecord }
+        const workoutRes = await pool.query(`INSERT INTO workout_data(user_id,workout_name,workout_note) VALUES ($1,$2,$3) RETURNING workout_id`, [userId, workoutName, workoutNotes])
+        const workoutId = workoutRes.rows[0].workout_id;
+
+        for (const exercise of exerciseData) {
+            const exerciseRes = await pool.query(
+                `INSERT INTO exercise_data(workout_id, exercise_name) VALUES ($1, $2) RETURNING exercise_id`,
+                [workoutId, exercise.name]
+            );
+
+            const exerciseId = exerciseRes.rows[0].exercise_id;
+
+            for (const set of exercise.sets) {
+                await pool.query(
+                    `INSERT INTO set_data(exercise_id, weight, reps_count) VALUES ($1, $2, $3)`,
+                    [exerciseId, set.weight, set.reps]
+                );
+            }
+        }
+
+        console.log('Workout data entered!')
+    } catch (error) {
+        console.log(error.message)
+    }
+}
+
+module.exports = { findUserByEmail, addUserInDb, userAndProfile, addUserProfile, addSleepRecord, addMoodRecord, addWorkoutRecord }
