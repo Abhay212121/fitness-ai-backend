@@ -72,4 +72,38 @@ const addWorkoutRecord = async (userId, workoutName, workoutNotes, exerciseData)
     }
 }
 
-module.exports = { findUserByEmail, addUserInDb, userAndProfile, addUserProfile, addSleepRecord, addMoodRecord, addWorkoutRecord }
+const addNewTemplate = async (userId, exercises, templateName, workoutName) => {
+    try {
+        // Step 1: Insert into templates
+        const templateRes = await pool.query(
+            `INSERT INTO templates (user_id, template_name) VALUES ($1, $2) RETURNING template_id`,
+            [userId, templateName]
+        );
+        const templateId = templateRes.rows[0].template_id;
+
+        // Step 2: Loop through each exercise
+        for (const exercise of exercises) {
+            const exerciseRes = await pool.query(
+                `INSERT INTO template_exercise(template_id, exercise_name) VALUES ($1, $2) RETURNING template_exercise_id`,
+                [templateId, exercise.name]
+            );
+            const templateExerciseId = exerciseRes.rows[0].template_exercise_id;
+
+            // Step 3: Insert each set for the exercise
+            for (const set of exercise.sets) {
+                await pool.query(
+                    `INSERT INTO template_set(template_exercise_id, weight, reps_count) VALUES ($1, $2, $3)`,
+                    [templateExerciseId, set.weight, set.reps]
+                );
+            }
+        }
+
+        console.log("Template saved successfully!");
+    } catch (err) {
+        console.error("Error saving template:", err.message);
+        throw err;
+    }
+};
+
+
+module.exports = { findUserByEmail, addUserInDb, userAndProfile, addUserProfile, addSleepRecord, addMoodRecord, addWorkoutRecord, addNewTemplate }

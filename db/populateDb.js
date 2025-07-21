@@ -96,6 +96,33 @@ CREATE TABLE IF NOT EXISTS set_data(
 );
 `
 
+const templateTableSQL = `
+DROP TABLE IF EXISTS templates;
+CREATE TABLE IF NOT EXISTS templates(
+  template_id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+  user_id INTEGER REFERENCES users(user_id),
+  template_name TEXT
+);
+`
+
+const templateExerciseSQL = `
+DROP TABLE IF EXISTS template_exercise;
+CREATE TABLE IF NOT EXISTS template_exercise(
+  template_exercise_id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+  exercise_name TEXT,
+  template_id INTEGER REFERENCES templates(template_id) ON DELETE CASCADE
+);
+`
+const templateSetsSQL = `
+DROP TABLE IF EXISTS template_set;
+CREATE TABLE IF NOT EXISTS template_set (
+  template_set_id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+  template_exercise_id INTEGER REFERENCES template_exercise(template_exercise_id) ON DELETE CASCADE,
+  weight REAL,
+  reps_count INTEGER
+);
+
+`
 
 async function main() {
   console.log('Sending...')
@@ -103,9 +130,9 @@ async function main() {
     connectionString: process.env.CONNECTION_STRING
   })
   await client.connect()
-  await client.query(workoutTableSQL)
-  await client.query(exerciseTableSQL)
-  await client.query(setTableSQL)
+  await client.query(templateTableSQL)
+  await client.query(templateExerciseSQL)
+  await client.query(templateSetsSQL)
   // await client.query(moodTableSQL)
   // await client.query(`DROP TABLE IF EXISTS users`)
   // await client.query(`DROP TABLE IF EXISTS user_profiles`)

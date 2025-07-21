@@ -36,4 +36,18 @@ const postWorkoutData = async (req, res) => {
     }
 }
 
-module.exports = { postSleepData, postMoodData, postWorkoutData }
+const saveTemplate = async (req, res) => {
+    const workoutName = req.body.workoutName;
+    const templateName = req.body.templateName;
+    const exerciseData = req.body.currentWorkout;
+    const userId = req.user_id
+    console.log(workoutName, templateName, exerciseData, userId)
+    try {
+        await db.addNewTemplate(userId, exerciseData, templateName, workoutName)
+        return res.json({ status: 200, msg: 'Template added!' })
+    } catch (error) {
+        return res.json({ status: 500, msg: error.message })
+    }
+}
+
+module.exports = { postSleepData, postMoodData, postWorkoutData, saveTemplate }
