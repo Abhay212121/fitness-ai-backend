@@ -29,14 +29,6 @@ OPENAI_API_KEY=your_openai_key
 
 ## 🧪 Getting Started
 
-Clone and run locally:
-
-```bash
-git clone https://github.com/yourusername/fithub-backend.git
-cd fithub-backend
-npm install
-npx prisma migrate dev
-npm run dev
 📬 API Endpoints Overview
 Method	Route	Description
 POST	/api/auth/register	Register a new user
