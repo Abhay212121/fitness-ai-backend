@@ -30,14 +30,14 @@ OPENAI_API_KEY=your_openai_key
 ## 🧪 Getting Started
 
 📬 API Endpoints Overview
-Method	Route	Description
-POST	/api/auth/register	Register a new user
-POST	/api/auth/login	Login and get JWT
-POST	/api/plan/generate	Generate fitness/diet plan (AI)
-POST	/api/track/mood	Log mood entry
-POST	/api/track/sleep	Log sleep entry
-GET	/api/track/mood	Get mood history
-GET	/api/track/sleep	Get sleep history
+Method	Route	Description <br/>
+POST	/api/auth/register	Register a new user <br/>
+POST	/api/auth/login	Login and get JWT <br/>
+POST	/api/plan/generate	Generate fitness/diet plan (AI) <br/>
+POST	/api/track/mood	Log mood entry <br/>
+POST	/api/track/sleep	Log sleep entry <br/>
+GET	/api/track/mood	Get mood history <br/>
+GET	/api/track/sleep	Get sleep history <br/>
 
 📄 License
 MIT License
