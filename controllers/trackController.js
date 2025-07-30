@@ -50,4 +50,23 @@ const saveTemplate = async (req, res) => {
     }
 }
 
-module.exports = { postSleepData, postMoodData, postWorkoutData, saveTemplate }
+const getTemplates = async (req, res) => {
+    const userId = req.user_id;
+    try {
+        const templates = await db.getTemplates(userId)
+        return res.json({ status: 200, msg: 'Templates fetched', data: templates })
+    } catch (error) {
+        return res.json({ status: 500, msg: error.message })
+    }
+}
+
+const getHistory = async (req, res) => {
+    const userId = req.user_id
+    try {
+        const history = await db.getHistory(userId)
+        return res.json({ status: 200, msg: 'History fetched', data: history })
+    } catch (error) {
+        return res.json({ status: 500, msg: error.message })
+    }
+}
+module.exports = { postSleepData, postMoodData, postWorkoutData, saveTemplate, getTemplates, getHistory }

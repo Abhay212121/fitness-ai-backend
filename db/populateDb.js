@@ -101,7 +101,8 @@ DROP TABLE IF EXISTS templates;
 CREATE TABLE IF NOT EXISTS templates(
   template_id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
   user_id INTEGER REFERENCES users(user_id),
-  template_name TEXT
+  template_name TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 `
 

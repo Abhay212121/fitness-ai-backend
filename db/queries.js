@@ -105,5 +105,103 @@ const addNewTemplate = async (userId, exercises, templateName, workoutName) => {
     }
 };
 
+const getTemplates = async (userId) => {
+    const templatesRes = await pool.query(
+        `SELECT * FROM templates WHERE user_id = $1`,
+        [userId]
+    );
 
-module.exports = { findUserByEmail, addUserInDb, userAndProfile, addUserProfile, addSleepRecord, addMoodRecord, addWorkoutRecord, addNewTemplate }
+    const templates = [];
+
+    for (const template of templatesRes.rows) {
+        const exercisesRes = await pool.query(
+            `SELECT * FROM template_exercise WHERE template_id = $1`,
+            [template.template_id]
+        );
+
+        const exercises = [];
+
+        for (const exercise of exercisesRes.rows) {
+            const setsRes = await pool.query(
+                `SELECT weight, reps_count FROM template_set WHERE template_exercise_id = $1`,
+                [exercise.template_exercise_id]
+            );
+
+            const sets = setsRes.rows.map(set => ({
+                weight: set.weight,
+                reps: set.reps_count,
+                completed: false,
+            }));
+
+            exercises.push({
+                id: exercise.template_exercise_id.toString(),
+                name: exercise.exercise_name,
+                sets,
+            });
+        }
+
+        templates.push({
+            id: template.template_id.toString(),
+            name: template.template_name,
+            exercises,
+            createdAt: template.created_at,
+        });
+    }
+
+    return templates;
+};
+
+const getHistory = async (userId) => {
+    try {
+        const workoutsRes = await pool.query(
+            `SELECT * FROM workout_data WHERE user_id = $1 ORDER BY created_at DESC`,
+            [userId]
+        );
+
+        const history = [];
+
+        for (const workout of workoutsRes.rows) {
+            const exercisesRes = await pool.query(
+                `SELECT * FROM exercise_data WHERE workout_id = $1`,
+                [workout.workout_id]
+            );
+
+            const exercises = [];
+
+            for (const exercise of exercisesRes.rows) {
+                const setsRes = await pool.query(
+                    `SELECT * FROM set_data WHERE exercise_id = $1`,
+                    [exercise.exercise_id]
+                );
+
+                const sets = setsRes.rows.map(set => ({
+                    weight: set.weight,
+                    reps: set.reps_count,
+                    completed: set.completed ?? true,
+                }));
+
+                exercises.push({
+                    id: exercise.exercise_id.toString(),
+                    name: exercise.exercise_name,
+                    sets,
+                });
+            }
+
+            history.push({
+                id: workout.workout_id.toString(),
+                name: workout.workout_name,
+                notes: workout.workout_note,
+                date: workout.created_at,
+                exercises,
+            });
+        }
+
+        return history;
+    } catch (error) {
+        console.error("Error fetching workout history:", error.message);
+        throw error;
+    }
+};
+
+
+module.exports = { findUserByEmail, addUserInDb, userAndProfile, addUserProfile, addSleepRecord, addMoodRecord, addWorkoutRecord, addNewTemplate, getTemplates, getHistory }
